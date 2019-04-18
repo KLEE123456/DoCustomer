@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.klee.DoCustomer.mapper.CustomerMapper">
+    <select id="findCustomerById" resultType="C" parameterType="integer">
+        SELECT * FROM customer WHERE id=#{id}
+    </select>
+    <select id="findAllCustomers" resultType="C">
+        SELECT * FROM customer
+    </select>
+    <select id="findLikeCustomers" resultType="C" parameterType="C">
+        <bind name="pattern_username" value="'%'+username+'%'"/>
+        select  * from  customer where  username like #{pattern_username}
+    </select>
+    <insert id="insertCustomer"  parameterType="C">
+        INSERT INTO customer(username,jobs,phone) VALUES(#{username} ,#{jobs} ,#{phone} );
+    </insert>
+    <update id="updateCustomer" parameterType="C">
+        UPDATE customer SET username=#{username} ,jobs=#{jobs} ,phone=#{phone}  WHERE id=#{id}
+    </update>
+    <delete id="deleteCustomer" parameterType="integer" >
+        DELETE FROM customer WHERE  id=#{id}
+    </delete>
+    <select id="findCustomersByNameJobs" resultType="C" parameterType="C">
+        select  * from customer
+        <where>
+            <if test="username != null and username != ''">
+                and  username like concat('%',#{username},'%')
+            </if>
+            <if test="jobs != null and jobs != ''">
+                and jobs=#{jobs}
+            </if>
+        </where>
+    </select>
+    <select id="findCustsByNameOrJobsOrPhone" resultType="C" parameterType="C">
+        select * from  customer
+        <where>
+            <choose>
+                <when test="username != null and username != ''">
+                    and  username like concat('%',#{username},'%')
+                </when>
+                <when test="jobs != null and jobs != ''">
+                    and jobs=#{jobs}
+                </when>
+                <otherwise>
+                    and phone is not null
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+    <update id="updateCustsNameOrJobOrPhone" parameterType="C">
+        update customer
+        <set>
+            <if test="username != null and username != ''">
+                username =#{username},
+            </if>
+            <if test="jobs != null and jobs != ''">
+                jobs=#{jobs},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone=#{phone},
+            </if>
+        </set>
+        where  id=#{id}
+    </update>
+    <select id="findCustsByIds" resultType="C" parameterType="list">
+        select  * from  customer where  id  in
+        <foreach collection="list" item="id" index="index" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>
